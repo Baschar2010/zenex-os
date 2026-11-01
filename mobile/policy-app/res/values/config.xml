@@ -1,0 +1,3 @@
+<resources>
+    <string name="zenex_private_dns_host" translatable="false">@ZENEX_PRIVATE_DNS_HOST@</string>
+</resources>

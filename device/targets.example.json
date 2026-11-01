@@ -1,0 +1,85 @@
+{
+  "schema": 2,
+  "selected_device": "redmi-note-14-pro-5g-global",
+  "devices": {
+    "redmi-note-14-pro-5g-global": {
+      "manufacturer": "Xiaomi",
+      "marketing_name": "Redmi Note 14 Pro 5G (Global)",
+      "model": "24090RA29G",
+      "codename": "malachite",
+      "soc": "MediaTek Dimensity 7300 Ultra (MT6878)",
+      "android_base": "LineageOS lineage-23.2 (Android 16 family)",
+      "lunch": {
+        "product": "lineage_malachite",
+        "release": "bp2a",
+        "variant": "userdebug",
+        "legacy_target": "lineage_malachite-bp2a-userdebug"
+      },
+      "repositories": [
+        {
+          "name": "device tree",
+          "repo": "https://github.com/puhboo/android_device_xiaomi_malachite.git",
+          "revision": "0f54832a13d8b4a79328c96025e3aac73b124ba8",
+          "path": "device/xiaomi/malachite",
+          "license": "Apache-2.0 (LineageOS headers in tree)"
+        },
+        {
+          "name": "kernel prebuilts required by device tree",
+          "repo": "https://github.com/mt6878-devs/android_device_xiaomi_malachite-kernel.git",
+          "revision": "ed07ab90777d5c96ad018bdfeafe3e1175402947",
+          "path": "device/xiaomi/malachite-kernel",
+          "license_reviewed": false
+        },
+        {
+          "name": "kernel source",
+          "repo": "https://github.com/mt6878-devs/android_kernel_xiaomi_mt6878.git",
+          "revision": "9f205dab5f27cf81e5036aeb46d7b79c13a751d9",
+          "path": "kernel/xiaomi/mt6878",
+          "license": "GPL-2.0; verify repository notices"
+        },
+        {
+          "name": "MediaTek vendor SEPolicy",
+          "repo": "https://github.com/mt6878-devs/android_device_mediatek_sepolicy_vndr.git",
+          "revision": "77533d8a42410d634b015623cb5fb0c45c57d687",
+          "path": "device/mediatek/sepolicy_vndr"
+        },
+        {
+          "name": "MediaTek hardware",
+          "repo": "https://github.com/mt6878-devs/android_hardware_mediatek.git",
+          "revision": "d3d6d6178dbfffb3bedb5f2fae2d477dbf9edba4",
+          "path": "hardware/mediatek"
+        },
+        {
+          "name": "Xiaomi hardware",
+          "repo": "https://github.com/mt6878-devs/android_hardware_xiaomi.git",
+          "revision": "8d8fd4a47d880b38271b264da2ad9702ed1d06d9",
+          "path": "hardware/xiaomi"
+        },
+        {
+          "name": "MediaTek IMS",
+          "repo": "https://github.com/mt6878-devs/android_vendor_mediatek_ims.git",
+          "revision": "57931f7e66c7fddc2e5bd360d913ba378ca3b568",
+          "path": "vendor/mediatek/ims",
+          "license": "Apache-2.0"
+        }
+      ],
+      "upstream_manifest": {
+        "repo": "https://github.com/LineageOS/android.git",
+        "branch": "lineage-23.2"
+      },
+      "vendor_blobs": {
+        "path": "vendor/xiaomi/malachite",
+        "source": "Extract from the owner's own stock firmware/device with device/xiaomi/malachite/extract-files.sh",
+        "redistribute": false,
+        "license_reviewed": false
+      },
+      "release_artifact_enabled": false,
+      "notes": [
+        "This profile targets the Global model 24090RA29G; China/India variants are not declared supported by this build profile.",
+        "Device development sources are community-maintained and some are archived; this is not an official Xiaomi or LineageOS device target.",
+        "The upstream device tree product is lineage_malachite. ZENEX branding/launcher integration is not automatically applied by selecting this lunch target.",
+        "Do not publish the resulting ROM or proprietary vendor files until redistribution rights and device-specific flashing instructions are reviewed."
+      ]
+    }
+  }
+}

@@ -1,0 +1,168 @@
+name: ZENEX multi-platform builds
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      build_gsi_arm64:
+        description: Build Android ARM64 GSI (userdebug)
+        required: true
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+jobs:
+  validate-and-package:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out ZENEX sources
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Validate Python sources and OISD snapshot
+        run: |
+          python -m py_compile network/dns-filter/zenex-dns-filter.py network/dns-filter/update-zenex-blocklist.py
+          python - <<'PY'
+          import importlib.util
+          from pathlib import Path
+          script = Path('network/dns-filter/update-zenex-blocklist.py')
+          spec = importlib.util.spec_from_file_location('zenex_updater', script)
+          module = importlib.util.module_from_spec(spec)
+          spec.loader.exec_module(module)
+          policy, count = module.clean(Path('network/policy/oisd-nsfw-small-upstream.txt').read_bytes(), 1000)
+          if count < 1000 or not policy.startswith(b'# Source: https://'):
+              raise SystemExit('OISD source validation failed')
+          active = module.clean(Path('network/policy/adult-domains.txt').read_bytes(), 1000)[0]
+          if active != policy:
+              raise SystemExit('Packaged OISD policy differs from normalized upstream snapshot')
+          print(f'Validated {count} OISD domains')
+          PY
+
+      - name: Validate Android XML, targets, and boot-animation ZIPs
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          from xml.etree import ElementTree
+          from zipfile import ZipFile
+          targets = json.loads(Path('device/targets.example.json').read_text())
+          assert targets['devices'][targets['selected_device']]['lunch']['product'] == 'lineage_malachite'
+          for path in Path('.').rglob('*.xml'):
+              if '.git' not in path.parts:
+                  ElementTree.parse(path)
+          standard = Path('mobile/boot-animation/generated/bootanimation.zip')
+          lowram = Path('mobile/boot-animation/generated/bootanimation-lowram.zip')
+          for path, expected in ((standard, 171), (lowram, 2)):
+              with ZipFile(path) as archive:
+                  names = archive.namelist()
+                  frames = [n for n in names if n.startswith(('part0/', 'part1/')) and n.lower().endswith('.png')]
+                  if len(frames) != expected or 'desc.txt' not in names:
+                      raise SystemExit(f'Invalid boot animation package: {path}')
+          print('Source metadata and boot-animation packages validated')
+          PY
+
+      - name: Package integration source bundle
+        run: |
+          mkdir -p dist
+          tar --exclude='./dist' --exclude='./.git' -czf dist/zenex-source-bundle.tar.gz .
+          sha256sum dist/zenex-source-bundle.tar.gz > dist/zenex-source-bundle.tar.gz.sha256
+
+      - name: Upload source bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: zenex-source-bundle
+          path: dist/zenex-source-bundle.tar.gz*
+          if-no-files-found: error
+          retention-days: 30
+
+  build-gsi-arm64:
+    if: ${{ (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')) || (github.event_name == 'workflow_dispatch' && inputs.build_gsi_arm64) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    env:
+      BUILD_ROOT: ${{ runner.temp }}/zenex-gsi-arm64
+      ANDROID_BUILD_JOBS: '2'
+      ZENEX_PRIVATE_DNS_HOST: family.adguard-dns.com
+      ZENEX_DOT_BOOTSTRAP_IP: 94.140.14.15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check free hosted runner limits before downloading AOSP
+        shell: bash
+        run: |
+          set -euo pipefail
+          free_kb="$(df -Pk "$RUNNER_TEMP" | awk 'NR==2 {print $4}')"
+          mem_kb="$(awk '/MemTotal/ {print $2}' /proc/meminfo)"
+          echo "Available disk: $((free_kb / 1024 / 1024)) GiB; memory: $((mem_kb / 1024 / 1024)) GiB"
+          if (( free_kb < 400000000 || mem_kb < 64000000 )); then
+            echo '::error::AOSP requires about 400 GB free disk and 64 GB RAM. ubuntu-latest provides 14 GB SSD and 8/16 GB RAM. Stopping before repo sync to avoid wasting the run.'
+            exit 1
+          fi
+          command -v repo >/dev/null || { echo 'Android repo launcher is missing.'; exit 1; }
+          command -v java >/dev/null || { echo 'Java is missing.'; exit 1; }
+          mkdir -p "$BUILD_ROOT"
+      - name: Sync Android sources
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$BUILD_ROOT"
+          repo init -u https://android.googlesource.com/platform/manifest -b android-latest-release
+          repo sync -c --no-clone-bundle --no-tags -j2 --fail-fast
+      - name: Stage ZENEX modules and build GSI
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$BUILD_ROOT"
+          test -f device/generic/common/gsi_arm64.mk || { echo 'The selected AOSP source does not expose the expected GSI product file.'; exit 1; }
+          bash "$GITHUB_WORKSPACE/scripts/stage-zenex-android.sh" "$GITHUB_WORKSPACE" "$BUILD_ROOT" device/generic/common/gsi_arm64.mk
+          source build/envsetup.sh
+          lunch gsi_arm64-userdebug
+          m -j"$ANDROID_BUILD_JOBS"
+          IMAGE="out/target/product/generic_arm64/system.img"
+          test -s "$IMAGE"
+          mkdir -p "$GITHUB_WORKSPACE/dist"
+          gzip -1 -c "$IMAGE" > "$GITHUB_WORKSPACE/dist/zenex-gsi-arm64-system.img.gz"
+          test "$(stat -c%s "$GITHUB_WORKSPACE/dist/zenex-gsi-arm64-system.img.gz")" -lt 2000000000 || { echo 'Compressed GSI exceeds the GitHub Release asset size limit.'; exit 1; }
+          cd "$GITHUB_WORKSPACE/dist"
+          sha256sum zenex-gsi-arm64-system.img.gz > zenex-gsi-arm64-SHA256SUMS.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: zenex-gsi-arm64
+          path: dist/zenex-gsi-arm64-*
+          if-no-files-found: error
+          retention-days: 14
+
+  publish-release:
+    if: ${{ github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v') }}
+    needs: [build-gsi-arm64]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download both platform outputs
+        uses: actions/download-artifact@v4
+        with:
+          pattern: zenex-gsi-arm64
+          path: release-assets
+          merge-multiple: true
+      - name: Publish experimental release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: ZENEX ${{ github.ref_name }} (experimental)
+          draft: false
+          prerelease: true
+          generate_release_notes: true
+          files: release-assets/*
+
+# The selected GSI target is gsi_arm64-userdebug (not aosp_arm64-userdebug).
+# DoT hostname/bootstrap IP are embedded in staged provider metadata.
+# The DPC needs fresh Device Owner enrollment; this is not a local OISD resolver.
+# Free ubuntu-latest is checked first and will stop before repo sync if undersized.

@@ -1,0 +1,8 @@
+[Plymouth Theme]
+Name=ZENEX
+Description=ZENEX startup animation
+ModuleName=script
+
+[script]
+ImageDir=/usr/share/plymouth/themes/zenex
+ScriptFile=/usr/share/plymouth/themes/zenex/zenex.script

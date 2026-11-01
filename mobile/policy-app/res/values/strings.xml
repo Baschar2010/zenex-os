@@ -1,0 +1,4 @@
+<resources>
+    <string name="admin_label">ZENEX network policy</string>
+    <string name="admin_description">Keeps the selected system Private DNS configuration managed on this ZENEX device.</string>
+</resources>

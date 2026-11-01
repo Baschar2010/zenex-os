@@ -1,0 +1,49 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+
+# Android / Gradle / Soong build output
+.gradle/
+.idea/
+local.properties
+out/
+out-*/
+*.iml
+
+# Linux build output and temporary rootfs/work directories
+build/
+dist/
+*.iso
+*.img
+*.qcow2
+*.vdi
+*.vmdk
+*.tmp
+*.log
+
+# Repo and local Android source trees
+.repo/
+repo/
+android-source/
+lineage-source/
+
+# Local secrets/configuration; keep only *.example templates
+.env
+.env.*
+!.env.example
+dns.conf
+*.key
+*.pem
+*.p12
+*.jks
+
+# OS/editor noise
+.DS_Store
+Thumbs.db
+Desktop.ini
+*.swp
+*.swo
+*~

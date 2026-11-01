@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid meet" role="img" aria-labelledby="title desc">
+  <title id="title">ZENEX boot animation</title>
+  <desc id="desc">The exact supplied ZENEX lightning and wordmark appear from black with a blue energy impact. The logo artwork itself is not redrawn or recolored.</desc>
+  <defs>
+    <radialGradient id="impact" cx="50%" cy="50%" r="50%">
+      <stop offset="0" stop-color="#dffaff" stop-opacity=".94"/>
+      <stop offset=".2" stop-color="#26cfff" stop-opacity=".7"/>
+      <stop offset=".62" stop-color="#006bff" stop-opacity=".2"/>
+      <stop offset="1" stop-color="#006bff" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="auraBlur" x="-100%" y="-100%" width="300%" height="300%">
+      <feGaussianBlur stdDeviation="58"/>
+    </filter>
+  </defs>
+  <rect width="1920" height="1080" fill="#000000"/>
+  <ellipse id="aura" cx="960" cy="540" rx="220" ry="245" fill="#006eff" opacity="0" filter="url(#auraBlur)"/>
+  <circle id="impact" cx="960" cy="540" r="26" fill="url(#impact)" opacity="0"/>
+  <circle class="ring ring1" cx="960" cy="540" r="35" fill="none" stroke="#55e8ff" stroke-width="3" opacity="0"/>
+  <circle class="ring ring2" cx="960" cy="540" r="52" fill="none" stroke="#147aff" stroke-width="2" opacity="0"/>
+  <!-- Exact user-provided ZENEX artwork: original 729x725 proportions and pixels. -->
+  <image id="zenexLogo" href="zenex-logo-transparent.png" x="595.5" y="177.5" width="729" height="725" preserveAspectRatio="none" opacity="0"/>
+  <style>
+    #aura { animation: aura 4.8s ease-out .36s forwards; }
+    #impact { animation: flash .7s ease-out .72s forwards; }
+    .ring1 { animation: ripple .9s cubic-bezier(.12,.66,.2,1) .72s forwards; }
+    .ring2 { animation: ripple 1.12s cubic-bezier(.12,.66,.2,1) .9s forwards; }
+    #zenexLogo { transform-box:view-box; transform-origin:960px 540px; animation: reveal 1.18s cubic-bezier(.12,.78,.19,1) .32s forwards, settlePulse 1.3s ease-in-out 1.75s 2; }
+    @keyframes aura { 0%{opacity:0} 24%{opacity:.76} 52%{opacity:.12} 100%{opacity:.25} }
+    @keyframes flash { 0%{opacity:0;transform:scale(.12)} 14%{opacity:1;transform:scale(1.3)} 58%{opacity:.46;transform:scale(3.2)} 100%{opacity:0;transform:scale(5)} }
+    @keyframes ripple { 0%{opacity:0;transform:scale(.28)} 18%{opacity:.8} 100%{opacity:0;transform:scale(7.8)} }
+    @keyframes reveal { 0%{opacity:0;transform:translateY(-92px) scale(.93)} 68%{opacity:1;transform:translateY(5px) scale(1.006)} 100%{opacity:1;transform:translateY(0) scale(1)} }
+    @keyframes settlePulse { 0%,100%{opacity:1} 50%{opacity:.92} }
+    @media (prefers-reduced-motion:reduce) {
+      #aura,#impact,.ring,#zenexLogo { animation-duration:.01ms!important;animation-delay:0ms!important;animation-iteration-count:1!important }
+    }
+  </style>
+</svg>

@@ -1,0 +1,5 @@
+# Choose a DNS-over-TLS resolver whose operator and filtering behavior you trust.
+# Do not replace this placeholder without explicit user/guardian selection.
+ZENEX_DOT_HOST=SET_A_DOT_HOSTNAME
+# A resolver IP address for bootstrap only; TLS still verifies the hostname.
+ZENEX_DOT_IP=SET_A_RESOLVER_IP

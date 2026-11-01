@@ -1,0 +1,1 @@
+-keep public class org.zenex.launcher.MainActivity { public *; }

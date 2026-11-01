@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<manifest>
+    <!-- Local-only Repo project. Copy this file into .repo/local_manifests/.
+         The path is relative to the checkout root and adds no remote project. -->
+    <project name="local/zenex" path="vendor/zenex" remote="local" />
+</manifest>

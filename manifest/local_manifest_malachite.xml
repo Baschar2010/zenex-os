@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<manifest>
+    <!-- Redmi Note 14 Pro 5G Global (24090RA29G), codename malachite.
+         All source revisions below are immutable commit IDs. -->
+    <project name="puhboo/android_device_xiaomi_malachite"
+             path="device/xiaomi/malachite" remote="github"
+             revision="0f54832a13d8b4a79328c96025e3aac73b124ba8" />
+    <project name="mt6878-devs/android_device_xiaomi_malachite-kernel"
+             path="device/xiaomi/malachite-kernel" remote="github"
+             revision="ed07ab90777d5c96ad018bdfeafe3e1175402947" />
+    <project name="mt6878-devs/android_kernel_xiaomi_mt6878"
+             path="kernel/xiaomi/mt6878" remote="github"
+             revision="9f205dab5f27cf81e5036aeb46d7b79c13a751d9" />
+    <project name="mt6878-devs/android_device_mediatek_sepolicy_vndr"
+             path="device/mediatek/sepolicy_vndr" remote="github"
+             revision="77533d8a42410d634b015623cb5fb0c45c57d687" />
+    <project name="mt6878-devs/android_hardware_mediatek"
+             path="hardware/mediatek" remote="github"
+             revision="d3d6d6178dbfffb3bedb5f2fae2d477dbf9edba4" />
+    <project name="mt6878-devs/android_hardware_xiaomi"
+             path="hardware/xiaomi" remote="github"
+             revision="8d8fd4a47d880b38271b264da2ad9702ed1d06d9" />
+    <project name="mt6878-devs/android_vendor_mediatek_ims"
+             path="vendor/mediatek/ims" remote="github"
+             revision="57931f7e66c7fddc2e5bd360d913ba378ca3b568" />
+</manifest>

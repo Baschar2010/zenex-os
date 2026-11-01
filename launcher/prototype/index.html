@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark light">
+  <title>ZENEX Home</title>
+  <style>
+    :root { color-scheme: dark; --bg:#080b13; --panel:#111827; --card:#192235; --line:#27344a; --fg:#f4f7ff; --muted:#aab7cc; --blue:#168cff; --cyan:#34d8ff; --radius:22px; font:16px/1.4 system-ui,-apple-system,"Segoe UI",sans-serif; }
+    * { box-sizing:border-box }
+    body { margin:0; min-height:100vh; color:var(--fg); background:radial-gradient(ellipse at 50% -20%,#142850,var(--bg) 62%); }
+    button { font:inherit; color:inherit; cursor:pointer }
+    .shell { max-width:1100px; margin:auto; min-height:100vh; padding:24px clamp(16px,4vw,48px); display:flex; flex-direction:column; gap:22px }
+    header { display:flex; align-items:center; justify-content:space-between; gap:16px }
+    .brand { display:flex; gap:12px; align-items:center; letter-spacing:.13em; font-weight:750 }
+    .bolt { color:var(--cyan); font-size:30px; text-shadow:0 0 18px #168cff }
+    .status { color:var(--muted); font-size:14px }
+    main { flex:1; display:grid; grid-template-columns:minmax(250px,.8fr) minmax(360px,1.2fr); gap:24px; align-items:center }
+    .settings,.preview { background:color-mix(in srgb,var(--panel) 94%,transparent); border:1px solid var(--line); border-radius:var(--radius); padding:clamp(20px,4vw,36px); box-shadow:0 22px 80px #0005 }
+    h1 { margin:0 0 8px; font-size:clamp(25px,4vw,36px); letter-spacing:-.03em }
+    p { color:var(--muted); margin:0 0 24px }
+    .choices { display:grid; gap:12px }
+    .choice { text-align:left; display:flex; gap:14px; align-items:center; width:100%; padding:16px; border:1px solid var(--line); background:var(--card); border-radius:17px }
+    .choice[aria-pressed="true"] { border-color:var(--blue); box-shadow:0 0 0 2px #168cff30 }
+    .choice-icon { width:46px;height:46px;display:grid;place-items:center;border-radius:14px;background:#25334b;font-size:23px }
+    .choice strong,.choice small { display:block }
+    .choice small { color:var(--muted); margin-top:3px }
+    .motion { display:flex; gap:11px; align-items:center; margin-top:21px; color:var(--muted) }
+    .motion input { width:19px;height:19px; accent-color:var(--blue) }
+    .preview { min-height:410px; display:flex; flex-direction:column; overflow:hidden; position:relative; background:linear-gradient(155deg,#172c4e,#0d1422 56%,#101727) }
+    .preview-top { display:flex; justify-content:space-between; color:#dce8fb; font-size:13px }
+    .page-dots { display:flex; gap:6px; justify-content:center; margin:20px 0 }
+    .page-dots i { width:6px;height:6px;border-radius:50%;background:#8394ad }
+    .apps { display:grid; grid-template-columns:repeat(4,minmax(48px,1fr)); gap:24px 14px; align-content:center; flex:1; max-width:460px; width:100%; margin:auto }
+    .app { text-align:center; font-size:12px; color:#e8eef8 }
+    .app i { display:grid; place-items:center; width:56px;height:56px; margin:0 auto 7px; border-radius:18px; background:linear-gradient(145deg,#32c7f5,#176be5); box-shadow:0 8px 20px #0005; font-style:normal; font-size:25px }
+    .dock { display:flex; justify-content:center; gap:13px; margin:18px auto 0; padding:12px 17px; border:1px solid #ffffff22; border-radius:23px; background:#101a2acc }
+    .dock i { width:44px;height:44px;display:grid;place-items:center;border-radius:14px;background:linear-gradient(145deg,#37d6f4,#2677ed);font-style:normal;font-size:21px }
+    .profile-ios .preview { border-radius:34px; background:radial-gradient(ellipse at 50% 10%,#263f66,#111827 70%) }
+    .profile-ios .app i { border-radius:22px }
+    .profile-ios .dock { border-radius:28px; background:#ffffff18; backdrop-filter:blur(18px) }
+    .profile-ios .apps { gap:28px 14px }
+    .reduced *, .reduced *::before, .reduced *::after { animation:none!important; transition:none!important; backdrop-filter:none!important }
+    :focus-visible { outline:3px solid var(--cyan); outline-offset:3px }
+    @media(max-width:760px) { main { grid-template-columns:1fr; } .preview { min-height:380px } }
+    @media(prefers-reduced-motion:reduce) { *,*::before,*::after { animation:none!important;transition:none!important;scroll-behavior:auto!important } }
+  </style>
+</head>
+<body>
+  <div class="shell" id="shell">
+    <header><div class="brand"><span class="bolt" aria-hidden="true">ϟ</span><span>ZENEX</span></div><div class="status">9:41 &nbsp; • &nbsp; Connected</div></header>
+    <main>
+      <section class="settings" aria-labelledby="title">
+        <h1 id="title">Home layout</h1>
+        <p>Choose how your apps and shortcuts are arranged. Your apps and privacy settings stay the same.</p>
+        <div class="choices" role="group" aria-label="Home layout">
+          <button class="choice" data-style="android" aria-pressed="true"><span class="choice-icon" aria-hidden="true">▦</span><span><strong>Android style</strong><small>Pages, widgets and app drawer</small></span></button>
+          <button class="choice" data-style="ios" aria-pressed="false"><span class="choice-icon" aria-hidden="true">▣</span><span><strong>iOS-inspired</strong><small>Icon pages, dock and app library</small></span></button>
+        </div>
+        <label class="motion"><input id="motion" type="checkbox"> Reduce motion and visual effects</label>
+        <p id="announce" role="status" aria-live="polite" style="margin:18px 0 0"></p>
+      </section>
+      <section class="preview" aria-label="Launcher preview">
+        <div class="preview-top"><span id="page-label">Home</span><span>◉ &nbsp; ▰</span></div>
+        <div class="page-dots" aria-hidden="true"><i></i><i></i><i></i></div>
+        <div class="apps">
+          <div class="app"><i>☎</i>Phone</div><div class="app"><i>✉</i>Messages</div><div class="app"><i>◉</i>Camera</div><div class="app"><i>▣</i>Gallery</div>
+          <div class="app"><i>⌕</i>Search</div><div class="app"><i>♫</i>Music</div><div class="app"><i>☼</i>Weather</div><div class="app"><i>⚙</i>Settings</div>
+        </div>
+        <div class="dock" aria-label="Favorites"><i>☎</i><i>✉</i><i>◉</i><i>⌕</i></div>
+      </section>
+    </main>
+  </div>
+  <script>
+    const shell = document.querySelector('#shell');
+    const announce = document.querySelector('#announce');
+    const buttons = [...document.querySelectorAll('[data-style]')];
+    let saved;
+    try { saved = JSON.parse(localStorage.getItem('zenex.launcher.preferences') || '{}'); } catch { saved = {}; }
+    function setStyle(style, speak = false) {
+      if (!['android','ios'].includes(style)) style = 'android';
+      shell.classList.toggle('profile-ios', style === 'ios');
+      buttons.forEach(button => button.setAttribute('aria-pressed', String(button.dataset.style === style)));
+      document.querySelector('#page-label').textContent = style === 'ios' ? 'Home · App Library' : 'Home · App drawer';
+      if (speak) announce.textContent = `${style === 'ios' ? 'iOS-inspired' : 'Android'} layout applied.`;
+      save({ ...saved, schema:1, homeStyle:style });
+    }
+    function save(value) { saved = value; try { localStorage.setItem('zenex.launcher.preferences', JSON.stringify(value)); } catch {} }
+    buttons.forEach(button => button.addEventListener('click', () => setStyle(button.dataset.style, true)));
+    const motion = document.querySelector('#motion');
+    motion.checked = Boolean(saved.reducedMotion || matchMedia('(prefers-reduced-motion: reduce)').matches);
+    shell.classList.toggle('reduced', motion.checked);
+    motion.addEventListener('change', () => { shell.classList.toggle('reduced', motion.checked); save({ ...saved, schema:1, reducedMotion:motion.checked }); });
+    setStyle(saved.homeStyle || 'android');
+  </script>
+</body>
+</html>

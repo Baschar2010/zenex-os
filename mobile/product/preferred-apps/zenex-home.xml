@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<preferred-activities>
+    <item name="org.zenex.launcher/.MainActivity">
+        <filter>
+            <action name="android.intent.action.MAIN" />
+            <category name="android.intent.category.HOME" />
+            <category name="android.intent.category.DEFAULT" />
+        </filter>
+    </item>
+</preferred-activities>

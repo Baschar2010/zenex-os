@@ -1,0 +1,153 @@
+# ZENEX OS – Projektdokumentation und vollständiger Quelltext-Katalog
+
+Stand: 28. Oktober 2026
+Projektname: ZENEX
+
+## Was diese Datei dokumentiert
+
+Diese Textdatei fasst die bisherige Planung und den bisher erstellten Projektstand zusammen: Produktidee, Branding, UI- und Boot-Design, Linux-/Android-Architektur, DNS-/Jugendschutzkonzept, Quellcode-Inventar, bereits vorgenommene Prüfungen, offene Punkte und geplante nächste Schritte. Die tatsächlichen Quelltexte, Konfigurationen, Bilder, Boot-Animationen und Lizenzhinweise liegen unverändert zusätzlich im ZIP-Paket `ZENEX-Projektpaket.zip` in derselben Projektmappe.
+
+Wichtig: Das Paket ist ein Quellcode- und Integrationspaket. Es ist kein fertig gebautes oder freigegebenes Betriebssystem-Image. Es gibt aktuell weder eine vollständige ZENEX-ISO noch ein vollständiges Android-Systemabbild.
+
+## 1. Ziel und Produktaufteilung
+
+ZENEX ist als eigenes, frei verteilbares Betriebssystemprojekt mit zwei technischen Varianten geplant:
+
+- ZENEX Mobile: AOSP als Android-Basis, anfangs als Cuttlefish-Virtualgerät. Geräteunterstützung ist später nur je exaktem Telefonmodell möglich, wenn Bootloader, Kernel, Treiber, Firmware, Mobilfunk, Kamera, Sensoren und Updates getestet sind.
+- ZENEX Desktop: Linux-Kernel und minimaler Linux-Unterbau mit eigener ZENEX-Oberfläche, zunächst für QEMU x86_64.
+
+Beide Ausgaben teilen Branding, Datenschutzregeln, Designvorgaben und DNS-Filterkonzept. Sie teilen keinen Kernel und werden nicht als ein universelles Image ausgegeben.
+
+Grundsätze: keine Google Play Services oder Google-Apps im Basisprodukt, kein Analytics-/Werbetracking, keine versteckten Hintergrundverbindungen, sichtbare und konfigurierbare DNS-Auswahl, keine Installation auf Windows-Systemlaufwerke während Tests.
+
+## 2. Branding und Design
+
+### Markenname und Logo
+
+Der vom Projektinhaber ausgewählte Name ist ZENEX. Das kanonische Logo ist das vom Inhaber übermittelte Bild mit dem facettierten elektrischen Blitz und dem Schriftzug ZENEX in Blau/Cyan. Form, Farbe, Facetten und Schriftzug sollen beibehalten werden. Das Original wird nicht überschrieben.
+
+Im ZIP befinden sich:
+
+- `assets/zenex-logo-source.png` – unverändertes Originalbild.
+- `assets/zenex-logo-transparent.png` – abgeleitete transparente Variante, bei der nur der äußere karierte Hintergrund über Transparenz entfernt wird.
+- `assets/zenex-boot-animation.svg` – leichte SVG-Vorschau.
+- `mobile/boot-animation/generated/bootanimation-preview.png` – Kontaktbogen zur visuellen Vorschau.
+- `desktop/plymouth/*.png` – Sprites für die Linux-Bootanimation.
+
+### Erscheinungsbild
+
+Die Zielästhetik ist dunkel, hochwertig und futuristisch mit schwarzen/dunkelblauen Flächen, elektrischen Blau-/Cyan-Akzenten und klarer Typografie. Das ZENEX-Logo soll auf Start-/Bootbildschirm und in der Oberfläche erscheinen. Für Mobilgeräte gibt es zwei umschaltbare Layoutprofile: ein Android-inspiriertes Profil mit Seiten/App-Schublade und ein iOS-inspiriertes Profil mit Icon-Seiten und Dock. Die iOS-Anmutung ist eine Stilrichtung; Apple-Markenbilder, proprietäre Symbole, Fonts oder exakte Kopien werden nicht verwendet.
+
+Für geringe Leistung soll das System unnötige Unschärfe, dauerhaft laufende Effekte und Animationen abschalten können. Tastatur, Touch, Screenreader, skalierbare Schrift, RTL-Sprachen, ausreichender Kontrast und reduzierte Bewegung gehören zu den Anforderungen, sind aber noch nicht vollständig umgesetzt oder getestet.
+
+### Boot-Animation
+
+Normale Android-Sequenz: 720×1280, 30 Bilder/Sekunde. Bilder 0–30 schwarz; 31–70 Blitz/Impuls; 71–110 Schriftzug fährt sanft von unten ein; anschließend dezentes Pulsieren bis Android den Bootprozess beendet.
+
+Low-RAM Android: ein sehr kleines ZIP mit zwei gleichartigen statischen PNG-Bildern, ohne schwere Animation. Das native Android-Bootanimationssystem rendert keine SVG-Dateien; SVG ist nur eine zusätzliche Quelle/Vorschau.
+
+Linux-PC: Plymouth-Skripte und getrenntes statisches Low-RAM-Theme sind angelegt, aber noch nicht in ein Linux-Image eingebaut.
+
+## 3. Netzwerk und 18+-Filter
+
+### Linux/PC-Prototyp
+
+`network/dns-filter/zenex-dns-filter.py` ist ein kleiner lokaler DNS-Proxy in Python-Standardbibliothek. Er soll DNS auf Loopback annehmen, Domains aus der lokalen Liste ablehnen und erlaubte DNS-Anfragen über DoT (DNS-over-TLS) an einen konfigurierten Resolver senden. Bei Fehlern wird nicht auf Klartext-DNS oder den Providerresolver zurückgefallen.
+
+`network/dns-filter/update-zenex-blocklist.py` lädt eine festgelegte OISD-NSFW-small-Domainliste über HTTPS, prüft Domain-Zeilen und Mindestanzahl, schreibt eine neue Liste zunächst temporär und ersetzt erst danach die aktive Liste. Provenienz, Lizenzverweis, Aktualisierungszeit, Anzahl und SHA-256 stehen in einer Begleitdatei.
+
+Mitgeliefert ist der zum Projektzeitpunkt heruntergeladene Snapshot aus OISD `nsfw_small`, Version `202610271642`, 18.546 Domains. Die Originaldaten, eine normalisierte Liste, Lizenzkopie und Herkunftsnotizen liegen unter `network/policy/`. Eine Open-Source-Liste kann unvollständig sein und sich ändern. Vor einer öffentlichen Veröffentlichung sind aktuelle Lizenz-/Attributionspflichten erneut zu prüfen. Die Datenquelle liefert in dieser Einbindung keine Signatur; SHA-256 dokumentiert den lokalen Zustand, authentifiziert aber allein nicht den Upstream.
+
+Systemd-Dateien planen Start des DNS-Dienstes, periodisches Update (12 Stunden), unprivilegierten Dienstnutzer, Laufzeitverzeichnis, Auflösung über systemd-resolved und Weiterleitung der Resolveranfragen auf den lokalen Proxy. Für die DoT-Verbindung müssen Hostname und Bootstrap-IP ausdrücklich gewählt werden. Kein Anbieter wird automatisch erfunden oder voreingestellt.
+
+### Android/AOSP-Konzept
+
+Android Private DNS ist ein DoT-Client des Betriebssystems. Der Launcher darf es nicht stillschweigend konfigurieren. Der Ordner `mobile/policy-app/` enthält einen DPC/Device-Owner-Ansatz: im Device-Owner-Fall soll beim erstmaligen Einrichten ein ausgewählter Private-DNS-Hostname systemweit gesetzt und die Änderung durch normale Nutzer-Einstellungen gesperrt werden. Die einfache App selbst ist noch nicht kompiliert/getestet. Eine andere Möglichkeit wäre ein privilegierter AOSP-Resolver-Hook, der die Domainliste systemseitig prüft.
+
+Eine Domainliste kann keinen absolut lückenlosen Schutz garantieren. Direkte IP-Adressen, alternative VPNs, private DoH-Implementierungen in Apps, neue Domains und Inhalte auf erlaubten Seiten können die Filterung umgehen. Kein TLS-Inhalt wird dafür entschlüsselt. Die bisherige Planung soll diese Grenzen offen ausweisen, statt „unbrechbar“ zu versprechen.
+
+## 4. Launcher
+
+### Browser-Prototyp
+
+`launcher/prototype/index.html` ist ein responsiver, einzelner HTML-Prototyp für Layoutwahl und Vorschau. Er wechselt zwischen Android-Stil und iOS-inspiriertem Stil, speichert die Auswahl lokal und enthält eine Reduce-Motion-Option. Der Prototyp ist kein Android-Paket.
+
+### Native Kotlin-App
+
+Unter `mobile/launcher/` liegen Android-Manifest, Soong-`Android.bp`, Ressourcen und Kotlin-Dateien. Der HOME-Activity-Entwurf zeigt installierte Apps, speichert die Layoutwahl und reduziert bei `isLowRamDevice` bzw. kleinem Memory-Class-Wert die Zahl der Elemente und lässt das Dock weg.
+
+Dies ist ein erstes Scaffold. Widgets, App-Bibliothek-Suche, App-Anordnung/Drag-and-drop, richtige System-Icon-Badges, vollständige Screenreader- und Tablet-Unterstützung sowie AOSP-Instrumentierung fehlen. Die App wurde nicht mit dem Android-Compiler gebaut, da in der Umgebung weder AOSP-Checkout noch Kotlin-/Android-Build-Umgebung bereitsteht.
+
+## 5. Systemintegration und Build-Bündel
+
+Unter `mobile/overlay/` gibt es Resource-Overlays für das ZENEX-Launcherpaket auf sekundären Displays und das Ausblenden der normalen Private-DNS-Einstellungsseite. Die Android-Dokumentation und AOSP-Quellen zeigen, dass die primäre HOME-Auswahl nicht über einen einfachen `frameworks/base`-`config.xml`-Eintrag erfolgt. Dafür liegt eine Preferred-Activities-Datei vor und ein Produkt-Makefile, das Launcher, Policy-App, Overlays und Bootanimation zusammenführt.
+
+`mobile/product/zenex_product.mk` und weitere Make-Fragmente sind Integrationsvorlagen. Sie müssen gegen eine konkrete, festgelegte AOSP-Version geprüft werden. Der private DNS-Hostname muss beim Paketieren absichtlich gesetzt werden.
+
+`scripts/build-zenex.sh` ist als Bash-Bündelskript für `desktop`, `aosp` oder `all` angelegt. Es soll eine Source-/Rootfs-Overlay-Zusammenstellung samt Prüfsumme erzeugen. Es ist kein ISO- oder AOSP-Kompilierer. Die Shellsyntaxprüfung konnte in der aktuellen Windows-Umgebung wegen des blockierten Git-Bash-Prozessstarts nicht durchgeführt werden. AOSP-/Kotlin-Kompilierung wurde nicht durchgeführt.
+
+## 6. Bisherige Arbeit und Prüfungen
+
+- Vorhaben von einem experimentellen selbst geschriebenen Kernel auf eine geteilte AOSP-Mobile- und Linux-PC-Architektur umgestellt.
+- ZENEX-Markenrichtlinie und Original-/Transparenzlogo abgelegt.
+- Android-Normal- und Low-RAM-Bootanimation generiert; Plymouth-Normal- und Low-RAM-Theme angelegt.
+- Responsive Launcher-UI-Prototyp und native Kotlin-HOME-App begonnen.
+- OISD NSFW-small Snapshot mit 18.546 Domains und Lizenzdatei aufgenommen; Downloader mit Validierung und atomarem Austausch angelegt.
+- Lokaler DoT-Proxy, systemd-Dateien, systemd-resolved-Konfiguration und AOSP Private-DNS-/Device-Owner-Konzept angelegt.
+- Python-Syntax, DNS-Frageparser, Domain-Suffix-Prüfung, DNS-REFUSED-Antwort und Normalisierung der Liste geprüft.
+- Android-XML-Dateien auf wohlgeformtes XML geprüft.
+- Es gab keine vollständige Betriebssystemkompilierung, keine QEMU-/Cuttlefish-Ausführung dieser neuen Integrationen und keine Gerätetests.
+
+## 7. Build- und Gerätebedingungen
+
+Die lokale Windows-Umgebung hat laut bisheriger Bestandsaufnahme etwa 249 GiB freien Platz auf C: und 12 logische Prozessoren. RAM ließ sich über die eingeschränkte Verwaltungsabfrage nicht zuverlässig lesen. AOSP empfiehlt laut Projektangaben etwa 400 GB freien Build-Speicher und mindestens 64 GB RAM. Der vollständige AOSP-Checkout wurde daher nicht gestartet. Windows bleibt unverändert und wird nicht als Ziel eines OS-Installers verwendet.
+
+Geplante PC-Laufzeitprofile (noch nicht qualifiziert):
+
+- Standard: 2 GiB VM-RAM, 2 vCPU, 32-GiB virtuelle Platte.
+- Sehr klein: 1 GiB, 1 vCPU, 16-GiB Platte; reduziertes UI, keine Effekte.
+- Entwicklung auf Windows: QEMU mit einer temporären virtuellen Platte, niemals die Windows-Systemplatte an den Installer hängen.
+
+Mobile Mindestziele sind Modellziele, keine Garantie für alle Handys: ARM64, zunächst ungefähr 2 GiB RAM/32 GiB Speicher; 1-GiB- und 32-Bit-Geräte nur als gesonderte Legacy-Prüfung. Treiber und Updates richten sich nach dem exakten Modell.
+
+## 8. Was noch geplant ist
+
+1. Die Build-Umgebung auf ausreichend großem Linux-Datenträger mit genügend Arbeitsspeicher vorbereiten und AOSP-Manifest/Revision konkret festlegen.
+2. Ein unverändertes AOSP-Cuttlefish-Image bauen und booten, bevor ZENEX-Patches integriert werden.
+3. Kotlin-Launcher und Device-Owner-App kompilieren; Build- und Laufzeitfehler beseitigen.
+4. Produktdefinition und Overlays in der konkreten AOSP-Version integrieren; HOME-Resolver/Preferred Activity und tatsächliche Private-DNS-Einstellung im Cuttlefish testen.
+5. Den DNS-Resolver auf einem Linux-Rootfs installieren, DoT-Endpunkt ausdrücklich auswählen, den Loopback-Resolver korrekt aktivieren und IPv4/IPv6 sowie Fehler-/Startreihenfolge testen.
+6. Firewall-Regeln für ausgehenden Klartext-DNS, DNS-over-TLS und IPv6 als dedizierte, überprüfbare Tabelle entwerfen; keine bestehende Host-Firewall ungefragt überschreiben.
+7. Updates der Domainliste mit upstream-Verfügbarkeit, Änderungsprüfung, falschen Treffern, Lizenzhinweisen und Wiederherstellung testen.
+8. Plymouth und Bootanimation in die Images einbinden; Boot, Login, Logo, Low-RAM-Variante und Übergang zum Desktop visuell prüfen.
+9. Linux-PC-Image und Android-Cuttlefish-Image bauen und mit QEMU/Cuttlefish testen. Für reale Telefone jeweils Modell, Treiber, Kamera, Mobilfunk, Sensoren, Energiesparen, Updates und Wiederherstellung testen.
+10. Erst nach Sicherheitsprüfung, Lizenzprüfung, reproduzierbarem Build, Update-/Recovery-Konzept und bestandenen Tests Release-Bilder erstellen.
+
+## 9. Vollständiger Datei- und Quellcodebestand
+
+`ZENEX-Projektpaket.zip` enthält den Projektordner mit folgenden Hauptbereichen:
+
+- `SPEC.md`, `ARCHITECTURE.md`, `ROADMAP.md`, `RESOURCE-TARGETS.md`, `BUILD-ENVIRONMENT.md`, `BRANDING.md` – Produktanforderungen, Systemaufteilung, Hardwareziele, Roadmap und Buildstatus.
+- `assets/` – Logo-Original, transparentes Logo, Logoimportskript und Vorschau.
+- `mobile/boot-animation/` – SVG-Fallback, generierte Android-ZIPs, Vorschau und Generatorhinweise.
+- `desktop/plymouth/` – PC-Bootanimation-Skripte und Bilder.
+- `network/` – DoT-Filter, Aktualisierungsskript, systemd-Konfiguration, OISD-Snapshot und Lizenznotizen.
+- `launcher/` – UI-Webprototyp und Launcher-Spezifikation.
+- `mobile/launcher/` – Kotlin-App, Android-Ressourcen und Soong-Modul.
+- `mobile/policy-app/` – Device-Owner-Policy-App-Scaffold.
+- `mobile/overlay/`, `mobile/product/` – AOSP-Overlays und Produktintegrationsvorlagen.
+- `scripts/` – Generator für Bootanimation sowie Build-Bündelskript.
+
+Die ZIP-Datei enthält die eigentlichen Dateien, nicht nur diese Zusammenfassung. Die großen PNG-Sequenzen sind in Android-Bootanimation-ZIPs gebündelt; einzelne PNG-Frames liegen nach der Generierung nicht zusätzlich im Quellordner.
+
+## 10. Zentrale Grenzen
+
+- Noch kein fertiges ISO, kein fertiges Android-Image und kein Installer.
+- Das Build-Bündelskript ersetzt keine Linux-Distribution-Buildwerkzeuge oder `m`/Soong im AOSP-Baum.
+- Der native Launcher und die Device-Owner-App müssen noch kompiliert werden.
+- DNS-Blocklisten sind ergänzend und keine mathematisch absolute Adult-Content-Erkennung.
+- Private DNS wirkt nur mit erreichbarem DoT-Endpunkt und gültigem Zertifikat; AOSP muss diesen Endpunkt vor Build/Enrollment erhalten.
+- Physische Android-Geräte benötigen je Modell proprietäre oder gerätespezifische Komponenten und Qualifikation.
+- ZENEX-Name und bereitgestelltes Logo müssen vor öffentlicher Verteilung marken-/lizenzrechtlich geklärt werden.
+
+Ende der Projektdokumentation.

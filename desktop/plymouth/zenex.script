@@ -1,0 +1,57 @@
+Window.SetBackgroundTopColor(0, 0, 0);
+Window.SetBackgroundBottomColor(0, 0, 0);
+
+bolt.image = Image("bolt.png");
+bolt.sprite = Sprite(bolt.image);
+bolt.sprite.SetZ(10);
+word.image = Image("wordmark.png");
+word.sprite = Sprite(word.image);
+word.sprite.SetZ(11);
+glow.image = Image("impact-glow.png");
+glow.sprite = Sprite(glow.image);
+glow.sprite.SetZ(9);
+
+frame = 0;
+fun refresh_callback() {
+    frame++;
+    screen_w = Window.GetWidth();
+    screen_h = Window.GetHeight();
+    group_h = bolt.image.GetHeight() + word.image.GetHeight();
+    x = (screen_w - bolt.image.GetWidth()) / 2;
+    y = (screen_h - group_h) / 2;
+    bolt_y = y;
+    word_y = y + bolt.image.GetHeight();
+    bolt_opacity = 0;
+    word_opacity = 0;
+    glow_opacity = 0;
+
+    # 0-30 black (~1 second at Plymouth's refresh cadence).
+    if (frame >= 50 && frame < 117) {
+        progress = (frame - 50) / 67;
+        if (progress > 1) progress = 1;
+        bolt_opacity = progress;
+        bolt_y = y - (1 - progress) * 70;
+        glow_opacity = (1 - progress) * 0.9;
+    } else if (frame >= 117 && frame < 184) {
+        bolt_opacity = 1;
+        progress = (frame - 117) / 67;
+        if (progress > 1) progress = 1;
+        word_opacity = progress;
+        word_y = y + bolt.image.GetHeight() + (1 - progress) * 75;
+    } else if (frame >= 184) {
+        bolt_opacity = 1;
+        word_opacity = 1;
+        pulse = 0.975 + 0.025 * (0.5 + 0.5 * Math.Cos(frame / 24));
+        bolt_opacity = pulse;
+        word_opacity = pulse;
+    }
+
+    bolt.sprite.SetPosition(x, bolt_y, 10);
+    bolt.sprite.SetOpacity(bolt_opacity);
+    word.sprite.SetPosition(x, word_y, 11);
+    word.sprite.SetOpacity(word_opacity);
+    glow.sprite.SetPosition((screen_w - glow.image.GetWidth()) / 2,
+                            y + bolt.image.GetHeight() / 4, 9);
+    glow.sprite.SetOpacity(glow_opacity);
+}
+Plymouth.SetRefreshFunction(refresh_callback);

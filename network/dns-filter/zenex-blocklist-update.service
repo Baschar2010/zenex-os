@@ -1,0 +1,23 @@
+[Unit]
+Description=Update ZENEX adult-domain filter from the configured OISD source
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+User=zenex-dns
+Group=zenex-dns
+ExecStart=/usr/lib/zenex/update-zenex-blocklist.py --output /var/lib/zenex/adult-domains.txt
+UMask=0022
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+ReadWritePaths=/var/lib/zenex
+RestrictAddressFamilies=AF_INET AF_INET6
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+LockPersonality=true
+MemoryDenyWriteExecute=true
+

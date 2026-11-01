@@ -1,0 +1,28 @@
+[Unit]
+Description=ZENEX local DNS policy proxy (DNS-over-TLS, fail closed)
+Before=systemd-resolved.service
+ConditionPathExists=/etc/zenex/dns.conf
+ConditionPathExists=/var/lib/zenex/adult-domains.txt
+
+[Service]
+Type=simple
+User=zenex-dns
+Group=zenex-dns
+EnvironmentFile=/etc/zenex/dns.conf
+ExecStart=/usr/lib/zenex/zenex-dns-filter.py --listen 127.0.0.1 --port 5353 --upstream-host ${ZENEX_DOT_HOST} --upstream-ip ${ZENEX_DOT_IP} --blocklist /var/lib/zenex/adult-domains.txt
+Restart=on-failure
+RestartSec=2
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictAddressFamilies=AF_INET AF_INET6
+LockPersonality=true
+MemoryDenyWriteExecute=true
+ReadOnlyPaths=/etc/zenex /var/lib/zenex
+
+[Install]
+WantedBy=multi-user.target

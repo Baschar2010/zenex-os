@@ -1,0 +1,8 @@
+[Plymouth Theme]
+Name=ZENEX Low RAM
+Description=Static ZENEX startup logo
+ModuleName=script
+
+[script]
+ImageDir=/usr/share/plymouth/themes/zenex
+ScriptFile=/usr/share/plymouth/themes/zenex/zenex-lowram.script

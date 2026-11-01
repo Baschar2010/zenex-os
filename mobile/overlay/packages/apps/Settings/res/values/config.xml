@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Hide the manual Private DNS editor. Enforcement comes from the
+         provisioned ZENEX device-owner policy, not from hiding this UI alone. -->
+    <bool name="config_show_private_dns_settings">false</bool>
+</resources>

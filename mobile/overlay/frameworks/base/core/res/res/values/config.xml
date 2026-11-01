@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- The forced system HOME launcher for secondary displays. Primary HOME
+         is assigned through product/etc/preferred-apps/zenex-home.xml. -->
+    <string name="config_secondaryHomePackage" translatable="false">org.zenex.launcher</string>
+    <bool name="config_useSystemProvidedLauncherForSecondary">true</bool>
+</resources>

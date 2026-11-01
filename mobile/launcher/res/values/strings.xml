@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">ZENEX Home</string>
+    <string name="settings">Appearance</string>
+    <string name="android_layout">Android style</string>
+    <string name="android_layout_summary">Pages and app drawer</string>
+    <string name="ios_layout">iOS-inspired</string>
+    <string name="ios_layout_summary">Icon pages and dock</string>
+    <string name="low_ram">Low-memory mode</string>
+    <string name="low_ram_description">Reduced effects, widgets and cached icons</string>
+    <string name="app_library">App library</string>
+    <string name="app_drawer">All apps</string>
+</resources>

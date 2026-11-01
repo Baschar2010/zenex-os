@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 1280" preserveAspectRatio="xMidYMid meet" role="img" aria-label="ZENEX startup logo">
+  <rect width="720" height="1280" fill="#000"/>
+  <image href="../../assets/zenex-logo-transparent.png" x="65" y="347" width="590" height="587" preserveAspectRatio="xMidYMid meet" opacity="0">
+    <animate attributeName="opacity" begin="0.15s" dur="0.18s" from="0" to="1" fill="freeze"/>
+  </image>
+  <style>@media (prefers-reduced-motion:reduce) { image { opacity:1 } }</style>
+</svg>
